@@ -42,6 +42,7 @@ const SHOW_CURSOR = `${ESC}?25h`;
 const CLEAR = `${ESC}2J${ESC}H`;
 const HOME = `${ESC}H`;
 const CLEAR_BELOW = `${ESC}J`;
+const CLEAR_EOL = `${ESC}K`;
 const RESET = `${ESC}0m`;
 const GREEN = `${ESC}32m`;
 const BRIGHT_GREEN = `${ESC}92m`;
@@ -130,8 +131,7 @@ function render(
   const title = `${BOLD}${BRIGHT_GREEN}🐍 CLAUDE SNAKE${RESET}`;
   const score = `${BOLD}score ${YELLOW}${state.score}${RESET}`;
 
-  return [
-    HOME,
+  const lines = [
     `  ${title}`,
     "",
     `  ${top}`,
@@ -141,8 +141,11 @@ function render(
     `  ${score}`,
     `  ${status}`,
     `  ${DIM}q quit · r restart${RESET}`,
-    CLEAR_BELOW,
-  ].join("\n");
+  ];
+  // CLEAR_EOL on every line wipes leftover chars when a line gets shorter
+  // (e.g. status shrinking from "playing" to "GAME OVER"); CLEAR_BELOW wipes
+  // any rows below if the board itself shrinks.
+  return HOME + lines.map((l) => l + CLEAR_EOL).join("\n") + CLEAR_BELOW;
 }
 
 // --- input ------------------------------------------------------------------
