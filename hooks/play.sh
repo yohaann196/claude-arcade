@@ -7,17 +7,28 @@ set -u
 SID="$(read_sid)"
 set_rdir "$SID"
 mkdir -p "$ARC_RDIR"
+
+ap=""
+if [ -n "${TMUX:-}" ]; then
+  ap="$(cat "$ARC_RDIR/pane" 2>/dev/null)"
+  # Self-heal: if the arcade pane was closed/killed, respawn it for this session.
+  # (ensure-pane resets state to paused, so write "playing" AFTER it.)
+  if ! pane_alive "$ap"; then
+    CLAUDE_ARCADE_SID="$SID" ARC_CLAUDE_PANE="${TMUX_PANE:-}" \
+      bash "${CLAUDE_PLUGIN_ROOT}/hooks/ensure-pane.sh" </dev/null
+    ap="$(cat "$ARC_RDIR/pane" 2>/dev/null)"
+  fi
+fi
+
 echo playing >"$ARC_RDIR/state"
 
-# Focus the arcade pane only if it is visible (same window as Claude) so we
-# don't no-op-focus a hidden/parked pane or yank focus across windows.
-if [ -n "${TMUX:-}" ] && [ -f "$ARC_RDIR/pane" ]; then
+if [ -n "${TMUX:-}" ]; then
+  # Focus the arcade pane only if it is visible (same window as Claude).
   BUN="$(command -v bun 2>/dev/null || echo "$HOME/.bun/bin/bun")"
   focus="$("$BUN" "${CLAUDE_PLUGIN_ROOT}/hooks/read-config.ts" autoFocus 2>/dev/null)"
-  if [ "$focus" != "false" ]; then
-    ap="$(cat "$ARC_RDIR/pane" 2>/dev/null)"
+  if [ "$focus" != "false" ] && pane_alive "$ap"; then
     cp="$(cat "$ARC_RDIR/claude_pane" 2>/dev/null)"
-    if pane_alive "$ap" && [ -n "$(win_of "$ap")" ] && [ "$(win_of "$ap")" = "$(win_of "$cp")" ]; then
+    if [ -n "$(win_of "$ap")" ] && [ "$(win_of "$ap")" = "$(win_of "$cp")" ]; then
       tmux select-pane -t "$ap" 2>/dev/null || true
     fi
   fi
