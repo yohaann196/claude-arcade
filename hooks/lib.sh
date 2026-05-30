@@ -1,23 +1,37 @@
 #!/usr/bin/env bash
 # Shared helpers for the claude-arcade hooks.
 
-# Sets ARC_DIR (global config/root) and ARC_RDIR (per-tmux-session runtime dir:
-# pane ids + play/pause state). Scoping by session id keeps two concurrent
-# Claude Code sessions from fighting over one arcade pane or play/pause flag.
-#
-# ARC_SID, if exported by the caller, wins (the Alt-j binding passes the exact
-# pressing session via tmux's #{session_id} so the toggle never guesses). Empty
-# query (no tmux server) falls back to a non-numeric "none" so it can't alias a
-# real session-0 runtime dir.
-arcade_dirs() {
-  ARC_DIR="$HOME/.claude-arcade"
-  local sid="${ARC_SID:-}"
-  [ -z "$sid" ] && sid="$(tmux display-message -p '#{session_id}' 2>/dev/null)"
-  sid="$(printf '%s' "$sid" | tr -cd '0-9')"
-  ARC_RDIR="$ARC_DIR/s${sid:-none}"
+# ARC_DIR holds global config + the plugin root pointer. ARC_RDIR is a
+# per-Claude-session runtime dir (pane ids + play/pause state). Keying on
+# Claude's session id (not the tmux session) means two Claude instances in the
+# same tmux session each get their own pane and state.
+
+arcade_base() { ARC_DIR="$HOME/.claude-arcade"; }
+
+sanitize_sid() { printf '%s' "${1:-}" | tr -cd 'a-zA-Z0-9' | cut -c1-32; }
+
+set_rdir() {
+  arcade_base
+  local s
+  s="$(sanitize_sid "${1:-}")"
+  [ -z "$s" ] && s="default"
+  ARC_SID_SAFE="$s"
+  ARC_RDIR="$ARC_DIR/sessions/$s"
 }
 
-# True if the given tmux pane id is still live.
-pane_alive() {
-  [ -n "${1:-}" ] && tmux list-panes -a -F '#{pane_id}' 2>/dev/null | grep -qx "$1"
+# Echo the Claude session id (sanitized). Uses CLAUDE_ARCADE_SID if the caller
+# already knows it (the Alt-j recreate path); otherwise parses the hook JSON on
+# stdin. Reads stdin at most once.
+read_sid() {
+  if [ -n "${CLAUDE_ARCADE_SID:-}" ]; then
+    sanitize_sid "$CLAUDE_ARCADE_SID"
+    return
+  fi
+  local bun
+  bun="$(command -v bun 2>/dev/null || echo "$HOME/.bun/bin/bun")"
+  sanitize_sid "$("$bun" "${CLAUDE_PLUGIN_ROOT}/hooks/session-id.ts" 2>/dev/null)"
 }
+
+pane_alive() { [ -n "${1:-}" ] && tmux list-panes -a -F '#{pane_id}' 2>/dev/null | grep -qx "$1"; }
+
+win_of() { [ -n "${1:-}" ] && tmux display-message -t "$1" -p '#{window_id}' 2>/dev/null; }

@@ -49,7 +49,7 @@ export function normalize(raw: Record<string, unknown>): ArcadeConfig {
   const chess = (raw.chess ?? {}) as Record<string, unknown>;
   return {
     defaultGame: str(raw.defaultGame, DEFAULT_CONFIG.defaultGame),
-    paneWidth: int(raw.paneWidth, DEFAULT_CONFIG.paneWidth, 30, 200),
+    paneWidth: int(raw.paneWidth, DEFAULT_CONFIG.paneWidth, 46, 200), // 46 = widest board (Snake)
     autoFocus: bool(raw.autoFocus, DEFAULT_CONFIG.autoFocus),
     snake: {
       tickMs: int(snake.tickMs, DEFAULT_CONFIG.snake.tickMs, 40, 400),

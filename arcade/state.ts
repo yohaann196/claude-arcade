@@ -1,19 +1,17 @@
-// The play/pause channel. The plugin hooks write one word to the state file:
-//   "playing" while Claude Code is generating, "paused" when it has finished.
-// Real-time games (snake) only advance while playing; turn-based games are
-// always playable but show the current Claude status.
+// The play/pause channel. The plugin hooks write one word to a per-session
+// state file whose path arrives in CLAUDE_ARCADE_STATE: "playing" while Claude
+// Code is generating, "paused" when it finishes.
 //
-// The path is per-tmux-session: ensure-pane.sh passes it via CLAUDE_ARCADE_STATE
-// so two concurrent Claude sessions don't share one play/pause flag. Falls back
-// to the global path when launched standalone.
+// Run standalone with `bun arcade/arcade.ts` and there is no hook and no state
+// file, so there is nothing to wait on: treat that as free play (everything
+// runs), otherwise Snake would sit frozen on a "prompt Claude" message forever.
 
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import { STATE_DIR } from "./config.ts";
 
-const STATE_FILE = process.env.CLAUDE_ARCADE_STATE ?? join(STATE_DIR, "state");
+const STATE_FILE = process.env.CLAUDE_ARCADE_STATE;
 
 export function isClaudeWorking(): boolean {
+  if (STATE_FILE === undefined || STATE_FILE === "") return true; // standalone: free play
   try {
     return readFileSync(STATE_FILE, "utf8").trim() === "playing";
   } catch {

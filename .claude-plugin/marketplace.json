@@ -1,5 +1,6 @@
 {
   "name": "claude-arcade",
+  "description": "Play games in a tmux side-pane while Claude Code works.",
   "owner": { "name": "Amaar Chughtai" },
   "plugins": [
     {

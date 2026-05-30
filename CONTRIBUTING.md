@@ -40,3 +40,16 @@ bun arcade/arcade.ts   # play it locally (any terminal, no tmux needed)
 
 Minesweeper, Tetris, Wordle, Solitaire, 2048-style variants, a harder chess
 eval. Open a PR - small and focused beats big and sprawling.
+
+## Recording the demo GIF (maintainers)
+
+The README hero can be a recorded GIF. `assets/demo.tape` is a [VHS](https://github.com/charmbracelet/vhs)
+script for it:
+
+```sh
+brew install vhs
+vhs assets/demo.tape   # writes assets/demo.gif
+```
+
+Tweak the tape to taste, commit `assets/demo.gif`, and swap the ASCII block in
+the README for `![Claude Arcade demo](assets/demo.gif)`.
