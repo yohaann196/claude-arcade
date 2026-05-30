@@ -1,0 +1,7 @@
+{
+  "name": "claude-snake",
+  "version": "0.1.0",
+  "description": "Play a snake game in a tmux side-pane while Claude Code is generating. Plays while Claude thinks, pauses when Claude is done.",
+  "author": { "name": "Amaar Chughtai" },
+  "keywords": ["game", "snake", "tmux", "fun", "productivity"]
+}

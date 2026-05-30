@@ -1,0 +1,11 @@
+{
+  "name": "claude-snake-marketplace",
+  "owner": { "name": "Amaar Chughtai" },
+  "plugins": [
+    {
+      "name": "claude-snake",
+      "source": "./",
+      "description": "Play snake in a tmux side-pane while Claude Code is generating."
+    }
+  ]
+}

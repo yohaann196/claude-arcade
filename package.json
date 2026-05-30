@@ -1,0 +1,19 @@
+{
+  "name": "claude-snake",
+  "version": "0.1.0",
+  "description": "Play snake in a tmux side-pane while Claude Code is generating.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "claude-snake": "bin/claude-snake"
+  },
+  "scripts": {
+    "play": "bun game/snake.ts",
+    "test": "bun test"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "author": "Amaar Chughtai",
+  "license": "MIT"
+}
