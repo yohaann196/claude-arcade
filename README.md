@@ -126,7 +126,7 @@ Claude Code owns the whole terminal, so the arcade rides in a tmux split beside 
 
 ## Add your own game
 
-A game is one file. Write the rules as plain functions, return a `GameModule`, register it. Every game follows the same small contract in `arcade/types.ts`, and Tic-Tac-Toe is the easiest one to copy. Minesweeper, Tetris, and Wordle are all wide open. See [CONTRIBUTING.md](CONTRIBUTING.md).
+A game is one file. Write the rules as plain functions, return a `GameModule`, register it. Every game follows the same small contract in `arcade/types.ts`, and Tic-Tac-Toe is the easiest one to copy. Minesweeper and Wordle are all wide open. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ```sh
 bun test               # game logic and renderer tests
